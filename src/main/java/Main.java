@@ -1,3 +1,4 @@
+import util.FilePathUtility;
 import window.Window;
 
 public class Main {
@@ -8,7 +9,7 @@ public class Main {
         window.create();
         window.use();
 
-        window.setIcon("C:\\Users\\fabif\\IdeaProjects\\SulfurEngine\\src\\main\\resources\\logo.png"); // TODO: fix this
+        window.setIcon(FilePathUtility.getResourceFilePath(Main.class, "logo.png")); // TODO: fix this
 
         while(!window.getShouldClose()){
             window.pollEvents();
