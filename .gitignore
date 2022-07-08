@@ -1,6 +1,7 @@
 /.idea/
 /.vscode/
 /target/
+/src_backup/
 /.gitignore
 /.gitmodules
 /.gitattributes

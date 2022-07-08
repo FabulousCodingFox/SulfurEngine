@@ -1,4 +1,12 @@
+package window;
+
 import org.lwjgl.glfw.*;
+import util.ImageParser;
+
+import java.awt.image.BufferedImage;
+import java.nio.Buffer;
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.system.MemoryStack.*;
@@ -13,6 +21,8 @@ public class Window {
     private int width, height, refreshRate, posX, posY;
     private boolean fullscreen, vsync, shown, resizable, mouseLocked;
 
+    private final ArrayList<Event> eventQueue;
+
     public Window(){
         this.title = "<SulfurEngine>";
         this.width = 640;
@@ -21,11 +31,11 @@ public class Window {
         this.vsync = false;
         this.refreshRate = 60;
         this.mouseLocked = false;
-
-        GLFWVidMode video = glfwGetVideoMode(glfwGetPrimaryMonitor());
-        assert video != null;
-        this.posX = (video.width() - this.width) / 2;
-        this.posY = (video.height() - this.height) / 2;
+        this.shown = true;
+        this.resizable = true;
+        this.posX = 0;
+        this.posY = 0;
+        this.eventQueue = new ArrayList<>();
     }
 
     public void setTitle(String title){
@@ -144,6 +154,18 @@ public class Window {
         return mouseLocked;
     }
 
+
+
+    public void setIcon(String path){
+        if(WINDOW_CREATED){
+            glfwSetWindowIcon(windowHandle, ImageParser.getImageBuffer(path, false));
+        }
+    }
+
+    public boolean getShouldClose(){
+        return glfwWindowShouldClose(windowHandle);
+    }
+
     public void create(){
         if(WINDOW_CREATED) return;
 
@@ -163,12 +185,23 @@ public class Window {
         if(windowHandle == NULL) throw new RuntimeException("Failed to create GLFW window");
 
         stackPush();
-
-        glfwMakeContextCurrent(windowHandle);
-
         glfwSwapInterval(vsync ? 1 : 0);
-
         if(getVisible()) glfwShowWindow(windowHandle);
+
+        WINDOW_CREATED = true;
+    }
+
+    public void use(){
+        glfwMakeContextCurrent(windowHandle);
+    }
+
+    public void swapBuffers(){
+        if(WINDOW_CREATED) glfwSwapBuffers(windowHandle);
+    }
+
+    public ArrayList<Event> pollEvents(){
+        if(WINDOW_CREATED) glfwPollEvents();
+        return eventQueue;
     }
 
     public void destroy(){
