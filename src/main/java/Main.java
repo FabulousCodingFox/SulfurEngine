@@ -20,6 +20,7 @@ public class Main {
             ArrayList<Event> eventQueue = window.pollEvents();
             for(Event event : eventQueue){
                 if(event instanceof KeyEvent keyEvent){
+                    System.out.println(keyEvent.getKey());
                     if(keyEvent.getAction() == KeyEvent.KEY_PRESSED){
                         if(keyEvent.getKey() == Key.ESCAPE){
                             window.setShouldClose(true);

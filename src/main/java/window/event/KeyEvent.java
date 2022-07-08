@@ -8,7 +8,7 @@ public class KeyEvent extends Event{
     public static int KEY_RELEASED = 1;
     public static int KEY_REPEATED = 2;
 
-    public KeyEvent(int key, int action){
+    public KeyEvent(int action, int key){
         this.key = key;
         this.action = action;
     }

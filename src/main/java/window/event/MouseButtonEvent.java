@@ -8,7 +8,7 @@ public class MouseButtonEvent extends Event{
     public static int BUTTON_RELEASED = 1;
     public static int BUTTON_REPEATED = 2;
 
-    public MouseButtonEvent(int button, int action){
+    public MouseButtonEvent(int action, int button){
         this.button = button;
         this.action = action;
     }
