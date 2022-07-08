@@ -2,10 +2,8 @@ package window;
 
 import org.lwjgl.glfw.*;
 import util.ImageParser;
+import window.event.*;
 
-import java.awt.image.BufferedImage;
-import java.nio.Buffer;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
 import static org.lwjgl.glfw.GLFW.*;
@@ -20,6 +18,7 @@ public class Window {
     private String title;
     private int width, height, refreshRate, posX, posY;
     private boolean fullscreen, vsync, shown, resizable, mouseLocked;
+    private String iconPath;
 
     private final ArrayList<Event> eventQueue;
 
@@ -36,6 +35,7 @@ public class Window {
         this.posX = 0;
         this.posY = 0;
         this.eventQueue = new ArrayList<>();
+        this.iconPath = "";
     }
 
     public void setTitle(String title){
@@ -157,6 +157,7 @@ public class Window {
 
 
     public void setIcon(String path){
+        this.iconPath = path;
         if(WINDOW_CREATED){
             glfwSetWindowIcon(windowHandle, ImageParser.getImageBuffer(path, false));
         }
@@ -178,17 +179,44 @@ public class Window {
         glfwDefaultWindowHints(); // optional, the current window hints are already the default
         glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
         glfwWindowHint(GLFW_RESIZABLE, getResizable() ? GLFW_TRUE : GLFW_FALSE);
-        glfwWindowHint(GLFW_CURSOR, getMouseLocked() ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
+        //glfwWindowHint(GLFW_CURSOR, getMouseLocked() ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL); //TODO: GLFW_INVALID_ENUM error: Invalid window hint 0x00033001
         glfwWindowHint(GLFW_REFRESH_RATE, getRefreshRate());
-
         this.windowHandle = glfwCreateWindow(getWidth(), getHeight(), getTitle(), getFullscreen() ? glfwGetPrimaryMonitor() : NULL, NULL);
         if(windowHandle == NULL) throw new RuntimeException("Failed to create GLFW window");
+        WINDOW_CREATED = true;
+
+        glfwSetKeyCallback(windowHandle, (window, key, scancode, action, mods) -> {
+            if(action == GLFW_PRESS){
+                eventQueue.add(new KeyEvent(KeyEvent.KEY_PRESSED, key));
+            }else if(action == GLFW_RELEASE){
+                eventQueue.add(new KeyEvent(KeyEvent.KEY_RELEASED, key));
+            }else if(action == GLFW_REPEAT){
+                eventQueue.add(new KeyEvent(KeyEvent.KEY_REPEATED, key));
+            }
+        });
+
+        glfwSetMouseButtonCallback(windowHandle, (window, button, action, mods) -> {
+            if(action == GLFW_PRESS){
+                eventQueue.add(new MouseButtonEvent(MouseButtonEvent.BUTTON_PRESSED, button));
+            }else if(action == GLFW_RELEASE){
+                eventQueue.add(new MouseButtonEvent(MouseButtonEvent.BUTTON_RELEASED, button));
+            }else if(action == GLFW_REPEAT){
+                eventQueue.add(new MouseButtonEvent(MouseButtonEvent.BUTTON_REPEATED, button));
+            }
+        });
+
+        glfwSetCursorPosCallback(windowHandle, (window, xpos, ypos) -> {
+            eventQueue.add(new MouseMoveEvent(xpos, ypos));
+        });
+
+        glfwSetScrollCallback(windowHandle, (window, xoffset, yoffset) -> {
+            eventQueue.add(new MouseScrollEvent(xoffset, yoffset));
+        });
 
         stackPush();
         glfwSwapInterval(vsync ? 1 : 0);
+        if(!this.iconPath.equals("")) setIcon(this.iconPath);
         if(getVisible()) glfwShowWindow(windowHandle);
-
-        WINDOW_CREATED = true;
     }
 
     public void use(){
@@ -201,7 +229,13 @@ public class Window {
 
     public ArrayList<Event> pollEvents(){
         if(WINDOW_CREATED) glfwPollEvents();
-        return eventQueue;
+        ArrayList<Event> events = new ArrayList<>(eventQueue);
+        eventQueue.clear();
+        return events;
+    }
+
+    public void setShouldClose(boolean shouldClose){
+        if(WINDOW_CREATED) glfwSetWindowShouldClose(windowHandle, shouldClose);
     }
 
     public void destroy(){
