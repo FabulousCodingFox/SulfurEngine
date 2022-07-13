@@ -14,11 +14,16 @@ public class Mesh {
     private int vbo, ibo;
     private Shader shader;
     private VertexAttrib[] attributes;
+    private Map<String, Object> uniforms;
 
     public Mesh() {}
 
     public void setTextures(Map<String, Texture> textures) {
         this.textures = textures;
+    }
+
+    public void setShader(Shader shader) {
+        this.shader = shader;
     }
 
     public void setMesh(float[] mesh, float[] indices, VertexAttrib[] vertAttrib, DrawMode drawMode) {
@@ -35,27 +40,28 @@ public class Mesh {
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     }
+
     public void render(Map<String, Object> uniforms){
         shader.use();
         shader.setUniforms(uniforms);
 
-        int i=0;
-        for(Map.Entry<String, Texture> entry : textures.entrySet()){
-            glActiveTexture(GL_TEXTURE0 + i);
-            glBindTexture(GL_TEXTURE_2D, entry.getValue().getID());
-            shader.setInt(entry.getKey(), i);
-            i++;
+        if(textures != null) {
+            int i = 0;
+            for (Map.Entry<String, Texture> entry : textures.entrySet()) {
+                glActiveTexture(GL_TEXTURE0 + i);
+                glBindTexture(GL_TEXTURE_2D, entry.getValue().getID());
+                shader.setInt(entry.getKey(), i);
+                i++;
+            }
         }
 
         glBindBuffer(GL_ARRAY_BUFFER, this.vbo);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this.ibo);
 
-        Arrays.stream(vertAttrib).forEach(VertexAttrib::apply);
+        Arrays.stream(attributes).forEach(VertexAttrib::apply);
 
         glDrawElements(GL_TRIANGLES, indices.length, GL_UNSIGNED_INT, 0);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-        textures.forEach((key, value) -> value.unbind());
-        shader.unbind();
     }
 }

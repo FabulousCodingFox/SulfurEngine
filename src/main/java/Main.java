@@ -1,7 +1,5 @@
 import util.FilePathUtility;
-import window.event.Event;
-import window.event.Key;
-import window.event.KeyEvent;
+import window.event.*;
 import window.Window;
 
 import java.util.ArrayList;
@@ -12,7 +10,7 @@ public class Main {
         window.setSize(1280, 860);
         window.setResizable(false);
         window.setTitle("SulfurEngine Demo");
-        window.setIcon(FilePathUtility.getResourceFilePath(Main.class, "logo.png")); // TODO: fix this
+        window.setIcon(FilePathUtility.getResourceFilePath(Main.class, "logo.png"));
         window.create();
         window.use();
 
