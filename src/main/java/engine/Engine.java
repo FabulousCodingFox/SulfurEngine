@@ -8,7 +8,7 @@ import window.Window;
 public class Engine {
     private static boolean OpenGLinitialized = false;
     private float clearColor_r, clearColor_g, clearColor_b, clearColor_a;
-    private Window window;
+    private final Window window;
 
     private boolean depthTestEnabled = false;
 
