@@ -1,8 +1,17 @@
+import engine.Engine;
+import mesh.DrawMode;
+import mesh.Mesh;
+import mesh.MeshCollection;
+import mesh.VertexAttrib;
+import texture.Interpolation;
+import texture.Texture;
+import texture.TextureMapping;
 import util.FilePathUtility;
 import window.event.*;
 import window.Window;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class Main {
     public static void main(String[] args) {
@@ -12,7 +21,63 @@ public class Main {
         window.setTitle("SulfurEngine Demo");
         window.setIcon(FilePathUtility.getResourceFilePath(Main.class, "logo.png"));
         window.create();
-        window.use();
+
+        Engine engine = new Engine(window);
+        engine.setClearColor(0.3f, 0.3f, 0.3f, 1.0f);
+        engine.setDepthTestingEnabled(true);
+
+        MeshCollection cubeCollection = new MeshCollection();
+
+        float[] vertices = {
+                -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+                0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+                0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+                0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+                -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+                -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+
+                -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+                0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+                0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+                0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+                -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
+                -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+
+                -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+                -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+                -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+                -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+                -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+                -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+                0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+                0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+                0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+                0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+                0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+                0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+                -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+                0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
+                0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+                0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+                -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+                -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+
+                -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+                0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+                0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+                0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+                -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
+                -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
+        };
+        Mesh cube = new Mesh(false);
+        cube.setMesh(vertices, new VertexAttrib[]{new VertexAttrib(0, 3, 20, 0), new VertexAttrib(1, 2, 20, 12)}, DrawMode.STATIC);
+
+        Texture cubeTexture = new Texture(FilePathUtility.getResourceFilePath(Main.class, "logo512.png"), Interpolation.LINEAR, TextureMapping.CLAMP_TO_EDGE);
+        HashMap<String, Texture> cubeTextures = new HashMap<>();
+        cubeTextures.put("logoTex", cubeTexture);
+        cube.setTextures(cubeTextures);
 
         while(!window.getShouldClose()){
             ArrayList<Event> eventQueue = window.pollEvents();
@@ -26,6 +91,13 @@ public class Main {
                     }
                 }
             }
+            cubeCollection.use();
+
+            HashMap<String, Object> uniforms = new HashMap<>();
+            uniforms.put("iTime", (float) window.getGLFWTime());
+            cube.render(uniforms);
+
+            engine.mainloop();
         }
 
         window.destroy();

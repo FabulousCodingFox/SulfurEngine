@@ -243,4 +243,8 @@ public class Window {
         glfwDestroyWindow(windowHandle);
         WINDOW_CREATED = false;
     }
+
+    public double getGLFWTime(){
+        return glfwGetTime();
+    }
 }
